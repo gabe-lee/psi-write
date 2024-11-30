@@ -1,0 +1,20 @@
+.{
+    .name = "psi-write",
+    .version = "0.0.1",
+    .minimum_zig_version = "0.13.0",
+
+    .dependencies = .{
+        .pooled_block_alloc = .{
+            .url = "https://github.com/gabe-lee/pooled-block-alloc/archive/refs/tags/0.1.1.tar.gz",
+            .hash = "1220bb70eeb38512c35dc7ec09a89f2e691276514ff46d14ae8703d9756752f0c402",
+        },
+    },
+
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "LICENSE",
+        "README.md",
+    },
+}
