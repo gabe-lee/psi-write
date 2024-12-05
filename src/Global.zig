@@ -1,8 +1,9 @@
 const std = @import("std");
 const mem = std.mem;
 const Allocator = mem.Allocator;
+const time = std.time;
 
-const block_alloc = @import("block_alloc");
+const block_alloc = @import("pooled_block_alloc");
 const PooledBlockAllocator = block_alloc.PooledBlockAllocator;
 const BlockAllocator = block_alloc.BlockAllocator;
 const StaticAllocBuffer = block_alloc.StaticAllocBuffer;
@@ -78,9 +79,14 @@ pub fn cleanup() void {
     Self.large_alloc_concrete.release_all_memory(false);
 }
 
-pub const U8BufSmall = StaticAllocBuffer.define(u8, &Self.small_block_alloc);
-pub const U8BufMedium = StaticAllocBuffer.define(u8, &Self.medium_block_alloc);
-pub const U8BufLarge = StaticAllocBuffer.define(u8, &Self.large_block_alloc);
+pub const Settings = struct {
+    pub var HistoryGroupMaxTime: i64 = 100000;
+    pub const HistoryGroupMinTime: i64 = 3000;
+};
+
+// pub const U8BufSmall = StaticAllocBuffer.define(u8, &Self.small_block_alloc);
+// pub const U8BufMedium = StaticAllocBuffer.define(u8, &Self.medium_block_alloc);
+// pub const U8BufLarge = StaticAllocBuffer.define(u8, &Self.large_block_alloc);
 
 // pub const BufSpan = struct {
 //     start: u32,
