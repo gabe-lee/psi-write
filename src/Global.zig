@@ -11,17 +11,17 @@ const StaticAllocBuffer = block_alloc.StaticAllocBuffer;
 const Self = @This();
 
 pub var root_alloc: Allocator = undefined;
-pub var large_alloc: Allocator = undefined;
-pub var large_block_alloc: BlockAllocator = undefined;
-pub var large_alloc_concrete: LargeAlloc = undefined;
-pub var medium_alloc: Allocator = undefined;
-pub var medium_block_alloc: BlockAllocator = undefined;
-pub var medium_alloc_concrete: MediumAlloc = undefined;
-pub var small_alloc: Allocator = undefined;
-pub var small_block_alloc: BlockAllocator = undefined;
-pub var small_alloc_concrete: SmallAlloc = undefined;
+pub var allocator_4096: Allocator = undefined;
+pub var block_allocator_4096: BlockAllocator = undefined;
+pub var pba_allocator_4096: PBA4096 = undefined;
+pub var allocator_1024: Allocator = undefined;
+pub var block_allocator_1024: BlockAllocator = undefined;
+pub var pba_allocator_1024: PBA1024 = undefined;
+pub var allocator_256: Allocator = undefined;
+pub var block_allocator_256: BlockAllocator = undefined;
+pub var pba_allocator_256: PBA256 = undefined;
 
-const LargeAlloc = PooledBlockAllocator.define(PooledBlockAllocator.Config{
+const PBA4096 = PooledBlockAllocator.define(PooledBlockAllocator.Config{
     .block_size = 4096,
     .backing_request_size = mem.page_size,
     .alloc_error_behavior = .PANICS,
@@ -33,7 +33,7 @@ const LargeAlloc = PooledBlockAllocator.define(PooledBlockAllocator.Config{
     .secure_wipe_freed_memory = false,
 });
 
-const MediumAlloc = PooledBlockAllocator.define(PooledBlockAllocator.Config{
+const PBA1024 = PooledBlockAllocator.define(PooledBlockAllocator.Config{
     .block_size = 1024,
     .backing_request_size = 4096,
     .alloc_error_behavior = .PANICS,
@@ -45,7 +45,7 @@ const MediumAlloc = PooledBlockAllocator.define(PooledBlockAllocator.Config{
     .secure_wipe_freed_memory = false,
 });
 
-const SmallAlloc = PooledBlockAllocator.define(PooledBlockAllocator.Config{
+const PBA256 = PooledBlockAllocator.define(PooledBlockAllocator.Config{
     .block_size = 256,
     .backing_request_size = 1024,
     .alloc_error_behavior = .PANICS,
@@ -60,33 +60,28 @@ const SmallAlloc = PooledBlockAllocator.define(PooledBlockAllocator.Config{
 pub fn init(use_root_alloc: Allocator) void {
     Self.root_alloc = use_root_alloc;
 
-    Self.large_alloc_concrete = LargeAlloc.new(Self.root_alloc);
-    Self.large_alloc = Self.large_alloc_concrete.allocator();
-    Self.large_block_alloc = Self.large_alloc_concrete.block_allocator();
+    Self.pba_allocator_4096 = PBA4096.new(Self.root_alloc);
+    Self.allocator_4096 = Self.pba_allocator_4096.allocator();
+    Self.block_allocator_4096 = Self.pba_allocator_4096.block_allocator();
 
-    Self.medium_alloc_concrete = MediumAlloc.new(Self.large_alloc);
-    Self.medium_alloc = Self.medium_alloc_concrete.allocator();
-    Self.medium_block_alloc = Self.medium_alloc_concrete.block_allocator();
+    Self.pba_allocator_1024 = PBA1024.new(Self.allocator_4096);
+    Self.allocator_1024 = Self.pba_allocator_1024.allocator();
+    Self.block_allocator_1024 = Self.pba_allocator_1024.block_allocator();
 
-    Self.small_alloc_concrete = SmallAlloc.new(Self.medium_alloc);
-    Self.small_alloc = Self.small_alloc_concrete.allocator();
-    Self.small_block_alloc = Self.small_alloc_concrete.block_allocator();
+    Self.pba_allocator_256 = PBA256.new(Self.allocator_1024);
+    Self.allocator_256 = Self.pba_allocator_256.allocator();
+    Self.block_allocator_256 = Self.pba_allocator_256.block_allocator();
 }
 
 pub fn cleanup() void {
-    Self.small_alloc_concrete.release_all_memory(false);
-    Self.medium_alloc_concrete.release_all_memory(false);
-    Self.large_alloc_concrete.release_all_memory(false);
+    Self.pba_allocator_256.release_all_memory(false);
+    Self.pba_allocator_1024.release_all_memory(false);
+    Self.pba_allocator_4096.release_all_memory(false);
 }
 
-pub const Settings = struct {
-    pub var HistoryGroupMaxTime: i64 = 100000;
-    pub const HistoryGroupMinTime: i64 = 3000;
-};
-
-// pub const U8BufSmall = StaticAllocBuffer.define(u8, &Self.small_block_alloc);
-// pub const U8BufMedium = StaticAllocBuffer.define(u8, &Self.medium_block_alloc);
-// pub const U8BufLarge = StaticAllocBuffer.define(u8, &Self.large_block_alloc);
+pub const U8Buf_256 = StaticAllocBuffer.define(u8, &Self.block_allocator_256);
+pub const U8Buf_1024 = StaticAllocBuffer.define(u8, &Self.block_allocator_1024);
+pub const U8Buf_4096 = StaticAllocBuffer.define(u8, &Self.block_allocator_4096);
 
 // pub const BufSpan = struct {
 //     start: u32,

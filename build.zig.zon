@@ -5,8 +5,8 @@
 
     .dependencies = .{
         .pooled_block_alloc = .{
-            .url = "https://github.com/gabe-lee/pooled-block-alloc/archive/refs/tags/0.1.1.tar.gz",
-            .hash = "1220bb70eeb38512c35dc7ec09a89f2e691276514ff46d14ae8703d9756752f0c402",
+            .url = "https://github.com/gabe-lee/pooled-block-alloc/archive/refs/tags/0.1.2.tar.gz",
+            .hash = "1220b7029f720ebc0dce9d50e7cead47c3ec63ff758b69cceed89252048521f5ef39",
         },
     },
 

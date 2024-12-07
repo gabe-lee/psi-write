@@ -335,11 +335,8 @@ pub inline fn restore_segments_to_active(self: *Self, insert_idx: T_SEG_IDX, cou
 pub inline fn remove_segments_from_active(self: *Self, remove_idx: usize, count: T_COUNT) void {
     assert(count != 0);
     assert(self.current_action_idx == self.action_list.len);
-    const new_slots = self.inactive_list.append_slots_slice_ptr(count);
-    const slice_to_move = self.active_list.slice()[remove_idx .. remove_idx + count];
-    @memcpy(new_slots, slice_to_move);
-    // TODO: extend API for StaticAllocBuffer library to have function that simply deletes a range from a list/slice without returning it
-    self.active_list.replace_range_assume_capacity(remove_idx, slice_to_move.len, new_slots[0..0]);
+    const new_inactive_slots = self.inactive_list.append_slots_slice_ptr(count);
+    self.active_list.transplant_range(remove_idx, count, new_inactive_slots);
     self.action_list.append(SegmentAction.new(.RemoveToInactive, remove_idx, count));
     self.group_list.ptr[self.current_group_idx] += 1;
     self.current_action_idx += 1;
